@@ -18,15 +18,15 @@ from config import *
 
 
 def unpickle(file):
-    fo = open(file, 'rb')
-    dict = pk.load(fo, encoding='bytes')
-    fo.close()
+    import pickle
+    with open(file, 'rb') as fo:
+        dict = pickle.load(fo, encoding='bytes')
     return dict
 
 def getData(filePath):
     TrainData = []
     for childDir in os.listdir(filePath):
-        if childDir != 'test_batch':
+        if 'data_batch' in childDir:
             f = os.path.join(filePath, childDir)
             data = unpickle(f)
             # train = np.reshape(data[str.encode('data')], (10000, 3, 32 * 32))
@@ -37,7 +37,7 @@ def getData(filePath):
             fileNames = np.reshape(data[b'filenames'], (10000, 1))
             datalebels = zip(train, labels, fileNames)
             TrainData.extend(datalebels)
-        else:
+        if childDir == "test_batch":
             f = os.path.join(filePath, childDir)
             data = unpickle(f)
             test = np.reshape(data[b'data'], (10000, 3, 32 * 32))
@@ -45,6 +45,8 @@ def getData(filePath):
             fileNames = np.reshape(data[b'filenames'], (10000, 1))
             TestData = zip(test, labels, fileNames)
     return TrainData, TestData
+
+
 def getFeat(TrainData, TestData):
     for data in TestData:
         image = np.reshape(data[0].T, (32, 32, 3))
@@ -71,7 +73,7 @@ def rgb2gray(im):
     return gray
 if __name__ == '__main__':
     t0 = time.time()
-    filePath = r'G:\DataLib\cifar-10-batches-py'
+    filePath = r'E:\dataset\cifar-10\cifar-10-batches-py'
     TrainData, TestData = getData(filePath)
     getFeat(TrainData, TestData)
     t1 = time.time()
